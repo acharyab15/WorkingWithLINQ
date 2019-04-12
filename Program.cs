@@ -19,7 +19,13 @@ namespace WorkingWithLINQ
 
             // 52 cards in a deck, 52/2 = 26
             var top = startingDeck.Take(26);
-            var bottom = startingDeck.Skip(26)
+            var bottom = startingDeck.Skip(26);
+            var shuffle = top.InterleaveSequenceWith(bottom);
+
+            foreach (var c in shuffle)
+            {
+                Console.WriteLine(c);
+            }
         }
 
 
@@ -51,21 +57,3 @@ namespace WorkingWithLINQ
     }
 }
 
-namespace LinqFaroShuffle
-{
-    public static class Extensions
-    {
-        public static IEnumerable<T> InterleaveSequenceWith<T>(this IEnumerable<T> first, IEnumerable<T> second)
-        {
-            var firstIter = first.GetEnumerator();
-            var secondIter = second.GetEnumerator();
-
-            while (firstIter.MoveNext() && secondIter.MoveNext())
-            {
-                yield return firstIter.Current;
-                yield return secondIter.Current;
-            }
-
-        }
-    }
-}
