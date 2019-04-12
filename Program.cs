@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LinqFaroShuffle;
 
 
 namespace WorkingWithLINQ
@@ -9,23 +10,40 @@ namespace WorkingWithLINQ
     {
         static void Main(string[] args)
         {
-            var startingDeck = from s in Suits()
-                               from r in Ranks()
-                               select new { Suit = s, Rank = r };
+            var startingDeck = (from s in Suits().LogQuery("Suit Generation")
+                               from r in Ranks().LogQuery("Rank Generation")
+                               select new { Suit = s, Rank = r })
+                               .LogQuery("Starting Deck")
+                               .ToArray();
 
-            // Display each card generated and place in startingDeck in the console
-            foreach (var card in startingDeck)
-                Console.WriteLine(card);
-
-            // 52 cards in a deck, 52/2 = 26
-            var top = startingDeck.Take(26);
-            var bottom = startingDeck.Skip(26);
-            var shuffle = top.InterleaveSequenceWith(bottom);
-
-            foreach (var c in shuffle)
+            var times = 0;
+            var shuffle = startingDeck;
+            do
             {
-                Console.WriteLine(c);
-            }
+                // Out shuffle
+                /*
+                shuffle = shuffle.Take(26)
+                    .LogQuery("Top Half")
+                    .InterleaveSequenceWith(shuffle.Skip(26)
+                    .LogQuery("Bottom Half"))
+                    .LogQuery("Shuffle")
+                    .ToArray();
+                */
+
+                // In shuffle
+                shuffle = shuffle.Skip(26).LogQuery("Bottom Half")
+                                 .InterleaveSequenceWith(shuffle.Take(26).LogQuery("Top Half"))
+                                 .LogQuery("Shuffle")
+                                 .ToArray();
+
+                foreach (var card in shuffle)
+                {
+                    Console.WriteLine(card);
+                }
+                Console.WriteLine(times);
+                times++;
+            } while (!startingDeck.SequenceEquals(shuffle));
+            Console.WriteLine(times);
         }
 
 
